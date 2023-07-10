@@ -1166,7 +1166,8 @@ void drawLives()
       for (int j=0; j<4; j++)
       {
         leds[pos++] = CRGB(0, 255, 0);
-        FastLED.show();       
+        //FastLED.show();
+        FastLEDshowESP32(); // this one works... mystery...
       }
       leds[pos++] = CRGB(0, 0, 0);      
       delay(20);
