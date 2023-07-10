@@ -202,7 +202,7 @@ void setup() {
 	
 	settings_init();	// load the user settings from EEPROM
 	
-	Wire.begin();
+	Wire.begin(17, 16);
 	accelgyro.initialize();
 	
 #ifdef USE_NEOPIXEL

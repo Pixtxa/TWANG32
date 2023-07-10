@@ -26,17 +26,17 @@
 #ifndef CONFIG_H
 	#define CONFIG_H
 
-#define DATA_PIN        16
-#define CLOCK_PIN       17
+#define DATA_PIN        26
+#define CLOCK_PIN       27
 
 /* Game is rendered to this and scaled down to your strip.
  This allows level definitions to work on all strip lengths  */
 #define VIRTUAL_LED_COUNT 1000  
 
 // what type of LED Strip....uncomment to define only one of these
-#define USE_APA102
+//#define USE_APA102
 
-//#define USE_NEOPIXEL
+#define USE_NEOPIXEL
 
 // Check to make sure LED choice was done right
 #if !defined(USE_NEOPIXEL) && !defined(USE_APA102)

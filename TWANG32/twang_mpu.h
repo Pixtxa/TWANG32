@@ -44,12 +44,12 @@ void Twang_MPU::getMotion6(int16_t* xAccel, int16_t* yAccel, int16_t* zAccel, in
 	Wire.write(MPU_DATA_REG_START);  // starting with register 0x3B (ACCEL_XOUT_H)
 	Wire.endTransmission(false);
 	Wire.requestFrom(MPU_ADDR,MPU_DATA_LEN,true);  // read the whole MPU data section
-	*xAccel=Wire.read()<<8|Wire.read();  // x Accel    
-	*yAccel=Wire.read()<<8|Wire.read();  // y Accel
-	*zAccel=Wire.read()<<8|Wire.read();  // z Accel
+	*yAccel=Wire.read()<<8|Wire.read();  // x Accel    
+	*zAccel=Wire.read()<<8|Wire.read();  // y Accel
+	*xAccel=Wire.read()<<8|Wire.read();  // z Accel
 	Wire.read(); Wire.read();  // Temperature..not used, but need to read it
-	*xGyro=Wire.read()<<8|Wire.read();  // x Gyro
-	*yGyro=Wire.read()<<8|Wire.read();  // y Gyro
-	*zGyro=Wire.read()<<8|Wire.read();  // z Gyro
+	*yGyro=Wire.read()<<8|Wire.read();  // x Gyro
+	*zGyro=Wire.read()<<8|Wire.read();  // y Gyro
+	*xGyro=Wire.read()<<8|Wire.read();  // z Gyro
 }
 
