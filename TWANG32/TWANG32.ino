@@ -92,6 +92,7 @@ bool attacking = 0;                // Is the attack in progress?
 
 Twang_MPU accelgyro = Twang_MPU();
 CRGB leds[VIRTUAL_LED_COUNT];
+CRGB pixels[14];
 RunningMedian MPUAngleSamples = RunningMedian(5);
 RunningMedian MPUWobbleSamples = RunningMedian(5);
 iSin isin = iSin();
@@ -205,6 +206,8 @@ void setup() {
 	Wire.begin(17, 16);
 	accelgyro.initialize();
 	
+	FastLED.addLeds<NEOPIXEL, 5>(pixels, 14);
+	
 #ifdef USE_NEOPIXEL
   Serial.print("\r\nCompiled for WS2812B (Neopixel) LEDs");
   FastLED.addLeds<LED_TYPE, DATA_PIN>(leds, MAX_LEDS);
@@ -275,6 +278,9 @@ void loop() {
         
         if(stage == SCREENSAVER){
             screenSaverTick();    
+            lives = 0;
+            levelNumber = -1;
+            drawLifebar();
         }else if(stage == STARTUP){
 			if (stageStartTime+STARTUP_FADE_DUR > mm) {
 				tickStartup(mm);
@@ -325,6 +331,7 @@ void loop() {
 
             // Ticks and draw calls
             FastLED.clear();
+            drawLifebar();
             tickConveyors();
             tickSpawners();
             tickBoss();
@@ -337,6 +344,7 @@ void loop() {
             // DEAD
             FastLED.clear();
 			tickDie(mm);
+            drawLifebar();
             if(!tickParticles()){
                 loadLevel();
             }
@@ -353,6 +361,7 @@ void loop() {
 						else
 						{
 						FastLED.clear(); 
+						drawLifebar();
 						save_game_stats(false);		// boss not killed
 						
 						// restart from the beginning
@@ -378,6 +387,7 @@ void loadLevel(){
 	// leave these alone
 	FastLED.setBrightness(user_settings.led_brightness);
 	updateLives();
+	drawLifebar();
 	cleanupLevel();    
 	playerAlive = 1;
 	lastLevel = false; // this gets changed on the boss level
@@ -671,6 +681,7 @@ void gameOver(){
 
     levelNumber = 0;
     loadLevel();
+    drawLifebar();
 }
 
 void die(){
@@ -689,6 +700,7 @@ void die(){
       }
       stageStartTime = millis();
       stage = DEAD;
+      drawLifebar();
     }
     killTime = millis();
 }
@@ -699,6 +711,7 @@ void die(){
 void tickStartup(long mm)
 {
   FastLED.clear();
+  drawLifebar();
   if(stageStartTime+STARTUP_WIPEUP_DUR > mm) // fill to the top with green
   {
     int n = _min(map(((mm-stageStartTime)), 0, STARTUP_WIPEUP_DUR, 0, user_settings.led_count), user_settings.led_count);  // fill from top to bottom
@@ -804,6 +817,95 @@ void drawPlayer(){
 void drawExit(){
     if(!boss.Alive()){
         leds[user_settings.led_count-1] = CRGB(0, 0, 255);
+    }
+}
+
+void drawLifebar(){
+  uint8_t off_size = 1;
+  uint8_t dot_size = 1;
+  uint8_t space_size = 1;
+  
+  switch (user_settings.lives_per_level){
+    case 1:
+      dot_size = 10;
+      break;
+    case 2:
+      dot_size = 4;
+      space_size = 2;
+      break;
+    case 3:
+      dot_size = 2;
+      space_size = 2;
+      break;
+    case 4:
+      space_size = 2;
+      break;
+    case 5:
+    case 6:
+      break;
+    case 7:
+    case 8:
+      off_size = 2;
+      space_size = 0;
+      break;
+    case 9:
+    case 10:
+      off_size = 1;
+      space_size = 0;
+      break;
+    case 11:
+    case 12:
+      off_size = 0;
+      space_size = 0;
+      break;
+  }
+  uint8_t pos = 3 + off_size;
+    if (levelNumber >= 0){      
+      for (int i = 0; i < lives; i++){
+        for (int j = 0; j<dot_size; j++){
+          pixels[(pos++)%12] = CRGB(255, 0, 0);
+        }
+        for (int j = 0; j<space_size; j++){
+          pos++;
+        }
+      }
+    }else{
+      for (int i = 0; i < 12; i++){
+        pixels[(pos++)%12] = CRGB(20, 0, 0);       
+      }
+      pixels[(millis()/113)%12] += CRGB(60, 0, 0);
+      pixels[(-millis()/229)%12] += CRGB(60, 0, 0);
+    }
+
+    switch (stage){
+      case STARTUP:
+          pixels[12] = CRGB(255, 255, 255);
+          pixels[13] = CRGB(0, 255, 0);
+        break;      
+      case BOSS_KILLED:
+      case WIN:
+        pixels[12] = CRGB(0, 255, 0);
+        break;
+      case GAMEOVER:
+      case DEAD:
+        pixels[12] = CRGB(255, 0, 0);
+        break;
+      case PLAY:
+        pixels[13] = CRGB(0, 20, 0);
+        if (attacking){
+          pixels[12] = CRGB(255, 255, 255);
+          pixels[13] = CRGB(0, 255, 0);
+        }
+        break;
+      case SCREENSAVER:
+        if ((millis()/4)%500 < 250){
+          pixels[12] = CRGB((millis()/4)%500, (millis()/4)%500, 0);
+          pixels[13] = CRGB(0, (millis()/4)%500, 0);
+        }else{      
+          pixels[12] = CRGB(500-(millis()/4)%500, 500-(millis()/4)%500, 0);
+          pixels[13] = CRGB(0, 500-(millis()/4)%500, 0);
+        }
+        break;      
     }
 }
 
@@ -946,6 +1048,7 @@ void tickBossKilled(long mm) // boss funeral
 	
 	int brightness = 0;
 	FastLED.clear();	
+	drawLifebar();
 	
 	if(stageStartTime+6500 > mm){
 		gHue++;
@@ -1024,6 +1127,7 @@ void tickGameover(long mm) {
 void tickWin(long mm) {
   int brightness = 0;
   FastLED.clear();
+  drawLifebar();
   if(stageStartTime+WIN_FILL_DURATION > mm){
     int n = _max(map(((mm-stageStartTime)), 0, WIN_FILL_DURATION, user_settings.led_count, 0), 0);  // fill from top to bottom
     for(int i = user_settings.led_count; i>= n; i--){
@@ -1051,6 +1155,7 @@ void drawLives()
   // show how many lives are left by drawing a short line of green leds for each life
   SFXcomplete();  // stop any sounds
   FastLED.clear(); 
+  drawLifebar();
   
   int pos = 0;  
   for (int i = 0; i < lives; i++)
@@ -1066,6 +1171,7 @@ void drawLives()
   FastLED.show();
   delay(400);
   FastLED.clear();
+  drawLifebar();
 }
 
 
@@ -1265,26 +1371,32 @@ void SFXattacking(){
     sound(freq, user_settings.audio_volume);
 }
 void SFXdead(){	
+	drawLifebar();
 	SFXFreqSweepNoise(1000, millis()-killTime, 1000, 10, 200);
 }
 
 void SFXgameover(){
+	drawLifebar();
 	SFXFreqSweepWarble(GAMEOVER_SPREAD_DURATION, millis()-killTime, 440, 20, 60);
 }
 
 void SFXkill(){
+    drawLifebar();
     sound(2000, user_settings.audio_volume);
 }
 void SFXwin(){
+	drawLifebar();
 	SFXFreqSweepWarble(WIN_OFF_DURATION, millis()-stageStartTime, 40, 400, 20);
 }
 
 void SFXbosskilled()
 {
+	drawLifebar();
 	SFXFreqSweepWarble(7000, millis()-stageStartTime, 75, 1100, 60);
 }
 
 void SFXcomplete(){
+    drawLifebar();
     soundOff();
 }
 
