@@ -265,6 +265,7 @@ void loop() {
             lastInputTime = mm;
             if(stage == SCREENSAVER){
                 levelNumber = -1;
+                sound_init(DAC_AUDIO_PIN);
                 stageStartTime = mm;
                 stage = WIN;
             }
@@ -366,6 +367,7 @@ void loop() {
 						
 						// restart from the beginning
 						stage = STARTUP;
+						sound_init(DAC_AUDIO_PIN);
 						stageStartTime = millis();
 						lives = user_settings.lives_per_level;						
 						
@@ -388,6 +390,7 @@ void loadLevel(){
 	FastLED.setBrightness(user_settings.led_brightness);
 	updateLives();
 	drawLifebar();
+	sound_init(DAC_AUDIO_PIN);
 	cleanupLevel();    
 	playerAlive = 1;
 	lastLevel = false; // this gets changed on the boss level
