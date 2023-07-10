@@ -1286,7 +1286,7 @@ void getInput(){
     MPUWobbleSamples.add(g);
 
     joystickTilt = MPUAngleSamples.getMedian();
-    if(JOYSTICK_DIRECTION == 1) {
+    if(user_settings.direction == 1 || user_settings.direction == 3) {
         joystickTilt = 0-joystickTilt;
     }
     joystickWobble = abs(MPUWobbleSamples.getHighest());

@@ -90,6 +90,7 @@ typedef struct {
 	uint32_t total_points;
 	uint16_t high_score;
 	uint16_t boss_kills;
+	uint8_t direction;
 	
 }settings_t;
 
@@ -247,6 +248,11 @@ void change_setting(char paramCode, uint16_t newValue)
 			settings_eeprom_write();
 		break;	
 		
+		case 'J': // lives per level
+			user_settings.direction = constrain(newValue, 0, 3);
+			settings_eeprom_write();
+		break;
+		
 		default:
 			Serial.print("Command Error: ");
 			Serial.println(readBuffer[0]);
@@ -266,6 +272,7 @@ void reset_settings() {
 	
 	user_settings.led_count = NUM_LEDS;
 	user_settings.led_brightness = DEFAULT_BRIGHTNESS;	
+	user_settings.direction = 0;
 	
 	user_settings.joystick_deadzone = DEFAULT_JOYSTICK_DEADZONE;
 	user_settings.attack_threshold = DEFAULT_ATTACK_THRESHOLD;

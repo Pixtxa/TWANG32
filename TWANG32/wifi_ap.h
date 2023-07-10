@@ -81,6 +81,10 @@ void sendStatsPage(WiFiClient client) {
 	client.print(user_settings.audio_volume);
 	client.print("' min='0' max='255'><input type='submit'></form></td></tr>");
 
+	client.print("<tr><td>Joystick direction (0-3)</td><td><form><input type='number' name='J' value='");
+	client.print(user_settings.direction);
+	client.print("' min='0' max='3'><input type='submit'></form></td></tr>");
+
 	client.print("<tr><td>Joystick Deadzone (3-12)</td><td><form><input type='number' name='D' value='");
 	client.print(user_settings.joystick_deadzone);
 	client.print("' min='3' max='12'><input type='submit'></form></td></tr>");
