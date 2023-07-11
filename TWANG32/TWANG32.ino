@@ -1544,7 +1544,7 @@ void sinelon()
 	
   // a colored dot sweeping back and forth, with fading trails
   fadeToBlackBy( leds, user_settings.led_count, 20);
-  int pos = beatsin16(13,0,user_settings.led_count);
+  int pos = beatsin16(13,0,user_settings.led_count-1);
   leds[pos] += CHSV( gHue, 255, 192);
 }
 
