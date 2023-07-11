@@ -210,7 +210,30 @@ void setup() {
 	
 #ifdef USE_NEOPIXEL
   Serial.print("\r\nCompiled for WS2812B (Neopixel) LEDs");
-  FastLED.addLeds<LED_TYPE, DATA_PIN>(leds, MAX_LEDS);
+  switch(user_settings.led_type)
+  {
+    case 1:
+      FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, MAX_LEDS);
+      break;
+    case 2:
+      FastLED.addLeds<WS2812B, DATA_PIN, RBG>(leds, MAX_LEDS);
+      break;
+    case 3:
+      FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, MAX_LEDS);
+      break;
+    case 4:
+      FastLED.addLeds<WS2812B, DATA_PIN, GBR>(leds, MAX_LEDS);
+      break;
+    case 5:
+      FastLED.addLeds<WS2812B, DATA_PIN, BRG>(leds, MAX_LEDS);
+      break;
+    case 6:
+      FastLED.addLeds<WS2812B, DATA_PIN, BGR>(leds, MAX_LEDS);
+      break;
+    default:
+      FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, MAX_LEDS);
+      break;
+  }
 #endif
 
 #ifdef USE_APA102

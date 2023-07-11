@@ -8,11 +8,11 @@
 
 // change this whenever the saved settings are not compatible with a change
 // It forces a reset from defaults.
-#define SETTINGS_VERSION 2 
+#define SETTINGS_VERSION 3
 #define EEPROM_SIZE				   256
 
 // LEDS
-#define NUM_LEDS        144
+#define NUM_LEDS        300
 #define MIN_LEDS				60
 
 
@@ -91,6 +91,7 @@ typedef struct {
 	uint16_t high_score;
 	uint16_t boss_kills;
 	uint8_t direction;
+	uint8_t led_type;
 	
 }settings_t;
 
@@ -253,6 +254,12 @@ void change_setting(char paramCode, uint16_t newValue)
 			settings_eeprom_write();
 		break;
 		
+		case 'T': // LED-Type
+			user_settings.led_type = constrain(newValue, 0, 6);
+			settings_eeprom_write();
+			ESP.restart();
+		break;
+		
 		default:
 			Serial.print("Command Error: ");
 			Serial.println(readBuffer[0]);
@@ -273,6 +280,7 @@ void reset_settings() {
 	user_settings.led_count = NUM_LEDS;
 	user_settings.led_brightness = DEFAULT_BRIGHTNESS;	
 	user_settings.direction = 0;
+	user_settings.led_type = 0;
 	
 	user_settings.joystick_deadzone = DEFAULT_JOYSTICK_DEADZONE;
 	user_settings.attack_threshold = DEFAULT_ATTACK_THRESHOLD;
@@ -298,10 +306,16 @@ void show_settings_menu() {
 	Serial.println("=     with a carriage return      =");
 	Serial.println("===================================");
 	
-	Serial.print("\r\nC=");	
+	Serial.print("\r\nT=");	
+	Serial.print(user_settings.led_type);
+	Serial.println(" (WS2812B LED type: 0=Neopixel, 1=RGB, 2=RBG, 3=GRB, 4=GBR, 5=BRG, 6=BGR)");
+
+	Serial.print("C=");	
 	Serial.print(user_settings.led_count);
 	
-	Serial.print(" (LED Count 60-");
+	Serial.print(" (LED Count ");
+	Serial.print(MIN_LEDS);
+	Serial.print("-");
 	Serial.print(MAX_LEDS);
 	Serial.println(")");
 	

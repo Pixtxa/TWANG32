@@ -63,6 +63,9 @@ void sendStatsPage(WiFiClient client) {
 
 	client.print("<table>");
 
+	client.print("<tr><td>WS2812B LED type (0=Neopixel, 1=RGB, 2=RBG, 3=GRB, 4=GBR, 5=BRG, 6=BGR)</td><td><form><input type='number' name='T' value='");
+	client.print(user_settings.led_type);
+	client.print ("' min='0' max='6'><input type='submit'></form></td></tr>");
 
 	client.print("<tr><td>");
 	client.print("LED Count (60-");
