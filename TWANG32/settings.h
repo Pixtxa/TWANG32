@@ -248,7 +248,7 @@ void change_setting(char paramCode, uint16_t newValue)
 			settings_eeprom_write();
 		break;	
 		
-		case 'J': // lives per level
+		case 'J': // joystick direction
 			user_settings.direction = constrain(newValue, 0, 3);
 			settings_eeprom_write();
 		break;
@@ -313,6 +313,10 @@ void show_settings_menu() {
 	Serial.print(user_settings.audio_volume);
 	Serial.println(" (Sound Volume 0-255)");
 	
+	Serial.print("J=");
+	Serial.print(user_settings.direction);
+	Serial.println(" (Joystick Direction 0-3)");
+
 	Serial.print("D=");
 	Serial.print(user_settings.joystick_deadzone);
 	Serial.println(" (Joystick Deadzone 3-12)");
@@ -323,7 +327,7 @@ void show_settings_menu() {
 	
 	Serial.print("L=");
 	Serial.print(user_settings.lives_per_level);
-	Serial.println(" (Lives per Level (3-9))");		
+	Serial.println(" (Lives per Level 3-9)");		
 	
 	Serial.println("\r\n(Send...)");
 	Serial.println("  ? to show current settings");
