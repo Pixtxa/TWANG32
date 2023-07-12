@@ -1237,7 +1237,7 @@ void save_game_stats(bool bossKill)
 // ---------------------------------
 void screenSaverTick(){
     long mm = millis();
-    int mode = (mm/30000)%4;
+    uint64_t mode = (mm/30000)%8;
   
 	SFXcomplete(); // turn off sound...play testing showed this to be a problem
 
@@ -1248,6 +1248,14 @@ void screenSaverTick(){
 		sinelon();
 	else if (mode == 2)
 		juggle();
+	else if (mode == 3)
+		LED_march();
+	else if (mode == 4)
+		colorWipes();
+	else if (mode == 5)
+		colorCircle();
+	else if (mode == 6)
+		colorWheel();
 	else {
 		random_LED_flashes();
 	}
@@ -1560,4 +1568,95 @@ void juggle() {
   }
 }
 
+void colorWipes()
+{
+  // fill led by led with one color after another
+  static int mymode = 0;
+  switch (mymode)
+  {
+    case 0:
+      if(colorWipe(CRGB(255, 0, 0), 20))
+      {
+        mymode++;
+      }
+      break;
+    case 1: 
+      if(colorWipe(CRGB(0, 255, 0), 20))
+      {
+        mymode++;
+      }
+      break;
+    case 2: 
+      if(colorWipe(CRGB(0, 0, 255), 20))
+      {
+        mymode++;
+      }
+      break;
+    case 3: 
+      if(colorWipe(CRGB(128, 128, 0), 20))
+      {
+        mymode++;
+      }
+      break;
+    case 4: 
+      if(colorWipe(CRGB(0, 128, 128), 20))
+      {
+        mymode++;
+      }
+      break;
+    case 5: 
+      if(colorWipe(CRGB(128, 0, 128), 20))
+      {
+        mymode++;
+      }
+      break;
+    default: 
+      if(colorWipe(CRGB(85, 85, 85), 20))
+      {
+        mymode = 0;
+      }
+      break;
+  }
+}
+
+int colorWipe(CRGB color, int wait)
+{
+  // fill led by led with one color
+  static long rmm = 0;
+  long cmm = millis() - rmm;
+  uint32_t i = (cmm/wait);
+
+  if (i >= user_settings.led_count)
+  {
+    rmm = millis();
+    cmm = 0;
+    if (i == (user_settings.led_count))
+    {
+      return 1;
+    }
+  }
+
+  leds[i] = color;
+  return 0;
+}
+
+void colorCircle()
+{
+  // cycle hue of whole stripe
+  long mm = millis();
+  for (int pos = 0; pos < user_settings.led_count; pos++)
+  {
+    leds[pos] = CHSV(-mm / 10, 255, 128);
+  }
+}
+
+void colorWheel()
+{
+  // cycle hue of each LED with offset between the LEDs
+  long mm = millis();
+  for (int pos = 0; pos < user_settings.led_count; pos++)
+  {
+    leds[pos] = CHSV((mm / 10) - (pos * 255 / user_settings.led_count), 255, 128);
+  }
+}
 
