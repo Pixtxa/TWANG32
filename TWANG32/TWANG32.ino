@@ -692,6 +692,11 @@ void levelComplete(){
 	{			
 		score = score + (lives * 10);  // 
 	}    
+
+	Serial.print("Level: ");
+	Serial.println(levelNumber);
+	Serial.print("Score: ");
+	Serial.println(score);
 }
 
 void nextLevel(){		
@@ -735,6 +740,11 @@ void die(){
       drawLifebar();
     }
     killTime = millis();
+
+    Serial.print("Level: ");
+    Serial.println(levelNumber);
+    Serial.print("Score: ");
+    Serial.println(score);
 }
 
 // ----------------------------------
