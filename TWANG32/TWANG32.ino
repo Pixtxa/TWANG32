@@ -35,6 +35,8 @@
 #include<Wire.h>
 #include "Arduino.h"
 #include "RunningMedian.h"
+#include <esp_task_wdt.h>
+#define WDT_TIMEOUT 3
 
 // twang files
 #include "config.h"
@@ -201,6 +203,10 @@ void setup() {
 	Serial.begin(115200);
 	Serial.print("\r\nTWANG32 VERSION: "); Serial.println(VERSION);	
 	
+	esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+	esp_task_wdt_add(NULL); //add current thread to WDT watch
+	pinMode(LED_BUILTIN, OUTPUT);
+
 	settings_init();	// load the user settings from EEPROM
 	
 	Wire.begin(17, 16);
@@ -1328,6 +1334,34 @@ void getInput(){
 			//Serial.print("wobble:"); Serial.println(joystickWobble);
 		#endif
 		
+    //Only reset watchdog if reading is different from the last one, so it also forces a reset if something is stuck
+    long mm = millis();
+    static long reset_mm = mm;
+
+    //The sensor is very accurate, so it's nearly impossible to get the same reading multiple times, even if it's resting still
+    static int16_t old_ax = 0, old_ay = 0, old_az = 0, old_gx = 0, old_gy = 0, old_gz = 0;
+    if (old_ax != ax || old_ay != ay || old_az != az || old_gx != gx || old_gy != gy || old_gz != gz)
+    {
+      old_ax = ax;
+      old_ay = ay;
+      old_az = az;
+      old_gx = gx;
+      old_gy = gy;
+      old_gz = gz;
+      esp_task_wdt_reset();
+      digitalWrite(LED_BUILTIN, LOW);
+      reset_mm = mm;
+    }
+    else
+    {
+      digitalWrite(LED_BUILTIN, HIGH);
+      //re-init sensor if connection is lost
+      if ((reset_mm + 314) < mm)
+      {
+        accelgyro.initialize();
+        reset_mm = mm;
+      }
+    }
 }
 
 // ---------------------------------
