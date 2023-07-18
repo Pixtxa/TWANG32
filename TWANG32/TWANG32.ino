@@ -903,9 +903,19 @@ void drawLifebar(){
   }
   uint8_t pos = 3 + off_size;
     if (levelNumber >= 0){      
+      uint64_t life_blink = millis() % ((levelNumber+7) * 333);
+      uint8_t brightness;
+      if (life_blink/333 > levelNumber || (life_blink % 333) > 111) //make it blink the level number
+      {
+        brightness = 31;
+      }
+      else
+      {
+        brightness = 255;
+      }
       for (int i = 0; i < lives; i++){
         for (int j = 0; j<dot_size; j++){
-          pixels[(pos++)%12] = CRGB(255, 0, 0);
+          pixels[(pos++)%12] = CRGB(brightness, 0, 0);
         }
         for (int j = 0; j<space_size; j++){
           pos++;
