@@ -29,7 +29,7 @@
 
 // 
 
-#define VERSION "2023-07-11"
+#define VERSION "2023-07-20"
 
 #include <FastLED.h>
 #include<Wire.h>
