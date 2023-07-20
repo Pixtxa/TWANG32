@@ -1,19 +1,8 @@
-# TWANG32
+# TWANG32 Hack
 An ESP32 based, 1D, LED strip, dungeon crawler. inspired by Line Wobbler by Robin B
 
-This was ported from the [TWANG fork](https://github.com/bdring/TWANG) by bdring of [Buildlog.net Blog](http://www.buildlog.net/blog?s=twang)
-
-[![Youtube Video](http://www.buildlog.net/blog/wp-content/uploads/2018/05/vid_thumb.png)](https://www.youtube.com/watch?v=RXpfa-ZvUMA)
-
-![TWANG LED Game](http://www.buildlog.net/blog/wp-content/uploads/2018/01/20180111_130909-1.jpg?s=200)
-
-## Why ESP32?
-- Lower Cost than Arduino Mega
-- Faster Processor
-- More Memory
-- Smaller (allows a smaller enclosure that is easier to print and more portable)
-- DAC pins for better sound capabilities.
-- WiFi and Bluetooth.
+The [ESP32 version](https://github.com/bdring/TWANG32) was ported from the [TWANG fork](https://github.com/bdring/TWANG) by bdring of [Buildlog.net Blog](http://www.buildlog.net/blog?s=twang)
+Pixtxa forked it again, added some extra leds to the controller and added some other features and bugfixes.
 
 **Current State**
 
@@ -23,60 +12,55 @@ This was ported from the [TWANG fork](https://github.com/bdring/TWANG) by bdring
   - **Password:** 12345666
   - **URL:** 192.168.4.1
 - You can update these settings over WiFi
+  - WS2812B LED type
   - LED Count
   - LED Brightness
   - Audio Volume
+  - Joystick direction
   - Joystick Deadzone (removes drift)
   - Attack Threshold (twang sensitivity)
   - Lives Per Level
 
-![](http://www.buildlog.net/blog/wp-content/uploads/2018/03/20180328_122254.jpg)
-
 ## TO DO List:
-
-- Wireless features~~
-  - 2 Player features by linking controllers. TBD
-=======
--  Settings:
-  - Change strip type.
--  Digitized Audio
-  - Currently the port uses the same square wave tones of the the Arduino version.
-  - I want to convert to digitized high quality sound effects.
-  - Possibly mix multiple sounds so things like lava and movement sound good at the same time.
-- Better looking mobile web interface (looks more like a web app)
-
-**BTW:** Since you have red this far... If you want to contribute, contact me and I might be able to get you some free or discounted hardware.
+- Wireless features
+  - level/score/life count/... live output
+  - stream to another stripe/make controller wireless
+  - support a brightness sensor for automatic dimming at night
+  - reset highscore
+- Add an extra animation if new highscore is set
+- Add a level display
+- Add a score display
+- Add a scoreboard/highscore list?
+- Config for adding a little glow to the LEDs, so people don't hit unlit parts of the LED chain at night or oversee it during build up/teardown
+- Save energy on idle for longer powerbank run time
 
 ## Required libraries:
 * [FastLED](http://fastled.io/)
 * [RunningMedian](http://playground.arduino.cc/Main/RunningMedian)
 
 ## Hardware used:
-* ESP32, I typically use the NodeMCU-32S module
-* LED light strip. The more the better, maximum of 1000. Tested with 1x & 2x 144/meter, 12x 60/meter and 5m x 114/meter strips. This has been tested with APA102C and NeoPixel type strips. Anything compatible with the FastLED library should work.
+* ESP32, I use the D1-mini module
+* I use cheap WS2812B ones, the maximum I used is 300 LEDs, which is a 5 m LED stripe with 60 LED/m, more might be bad because of the latency
+  * If you want it longer, I reccomend using more spacing between the LEDs to keep it cheap. I've combined two LED chains with 10 led/m, where the LEDs are visible from all sides, playing the game on 20 meters is really fun
+  * The game supports 1000 LEDs maximum, but then APA102C should be used. HD107S might also work, but I haven't tested this. Anything compatible with the FastLED library should work.
 * MPU6050 accelerometer
-* Spring doorstop, I used [these](http://smile.amazon.com/gp/product/B00J4Y5BU2)
-* Speaker and amplifier. I use a PAM8403 module. (ESP32 cannot drive a speaker as loudly as an Arduino)
+* Originally a spring doorstop, is used, I used a random spring from the local hardware store
+* Speaker and amplifier: A PAM8403 module is recomended, because the ESP32 cannot drive a speaker as loudly as an Arduino. But I've connected a piezoelectric speaker which is good enough for me
+* Some level converter because the LEDs want 5 V on the data lines. Somehow putting an 1 kOhm resistor in series works, found this hack somewhere
 
-See [Buildlog.net Blog](http://www.buildlog.net/blog?s=twang) for more details.
-
-Super easy to use kits and ready to play units [are available on Tindie](https://www.tindie.com/products/33366583/twang32-led-strip-game/).
-
-![TWANG 32 Controller](http://www.buildlog.net/blog/wp-content/uploads/2018/03/20180319_080636.jpg)
+See description of [ESP32 version](https://github.com/bdring/TWANG32) for more details.
 
 ## Enclosure
-[The STL files are here](http://www.buildlog.net/blog/wp-content/uploads/2018/04/twang32_stl.zip).
-
-![TWANG32](http://www.buildlog.net/blog/wp-content/uploads/2018/03/twang32_enclosure.jpg)
+[ESP32 version](https://github.com/bdring/TWANG32) has STL files, but I've used some e-waste parts.
 
 ## Overview
 The following is a quick overview of the code to help you understand and tweak the game to your needs.
 
 The game is played on a 1000 unit line, the position of enemies, the player, lava etc range from 0 to 1000 and the LEDs that represent them are derived using the `getLED()` function. You don't need to worry about this but it's good to know for things like the width of the attack and player max move speed. Regardless of the number of LEDs, everything takes place in this 1000 unit wide line.
 
-**LED SETUP** Defines the quantity of LEDs as well as the data and clock pins used. I've tested several APA102-C strips and the color order sometimes changes from BGR to GBR, if the player is not blue, the exit green and the enemies red, this is the bit you want to change. Brightness should range from 50 to 255, use a lower number if playing at night or wanting to use a smaller power supply. `DIRECTION` can be set to 0 or 1 to flip the game orientation. In `setup()` there is a `FastLED.addLeds()` line, in there you could change it to another brand of LED strip like the cheaper WS2812.
+**LED SETUP** Defines the quantity of LEDs as well as the data and clock pins used. I've tested several WS2812B strips and the color order sometimes changes. In my setup the player is green, the exit blue and the enemies are red. Brightness should range from 50 to 255, use a lower number if playing at night or wanting to use a smaller power supply. the joystick direction can be set to 0 or 1 to flip the game orientation. In `setup()` there is a `FastLED.addLeds()` line, in there you could change it to another brand of LED strip.
 
-The game also has 3 regular LEDs for life indicators (the player gets 3 lives which reset each time they level up). The pins for these LEDs are stored in `lifeLEDs[]` and are updated in the `updateLives()` function.
+I've added 13 other neopixels: A circle of 12 for life-display (that also output the level number by counting flashes) and one RGBW on top of the controller that lights up when wobble or on game start/end. They're set in `drawLifebar()` function.
 
 **JOYSTICK SETUP** All parameters are commented in the code, you can set it to work in both forward/backward as well as side-to-side mode by changing `JOYSTICK_ORIENTATION`. Adjust the `ATTACK_THRESHOLD` if the "Twanging" is overly sensitive and the `JOYSTICK_DEADZONE` if the player slowly drifts when there is no input (because it's hard to get the MPU6050 dead level).
 
@@ -119,8 +103,4 @@ They all call different functions and variables to setup the level. Each one is 
 * speed: The direction and speed of the travel. Negative moves to base and positive moves towards exit. Must be less than +/- max player speed.
 
 **spawnBoss();** (only one, don't edit boss level)
-<<<<<<< HEAD
 * There are no parameters for a boss, they always spawn in the same place and have 3 lives. Tweak the values of Boss.h to modify
-=======
-* There are no parameters for a boss, they always spawn in the same place and have 3 lives. Tweak the values of Boss.h to modify
->>>>>>> origin/master
