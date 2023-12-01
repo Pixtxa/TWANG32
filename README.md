@@ -4,6 +4,8 @@ An ESP32 based, 1D, LED strip, dungeon crawler. inspired by Line Wobbler by Robi
 The [ESP32 version](https://github.com/bdring/TWANG32) was ported from the [TWANG fork](https://github.com/bdring/TWANG) by bdring of [Buildlog.net Blog](http://www.buildlog.net/blog?s=twang)
 Pixtxa forked it again, added some extra leds to the controller and added some other features and bugfixes.
 
+https://github.com/Pixtxa/TWANG32-Hack/assets/30337073/99b64ab3-129b-4cfb-838a-5d0afe2453d9
+
 **Current State**
 
 - All of the Arduino version game features are functional.
